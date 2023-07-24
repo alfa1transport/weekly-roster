@@ -1,0 +1,867 @@
+var driverName='';
+var driverID=0;
+var weekNumber=0;
+var amMon = [];
+var amTue = [];
+var amWed = [];
+var amThu = [];
+var amFri = [];
+var amSat = [];
+var amSun = [];
+
+var pmMon = [];
+var pmTue = [];
+var pmWed = [];
+var pmThu = [];
+var pmFri = [];
+var pmSat = [];
+var pmSun = [];
+var driverComments =[];
+
+var doubleMon = [];
+var doubleTue = [];
+var doubleWed = [];
+var doubleThu = [];
+var doubleFri = [];
+var doubleSat = [];
+var doubleSun = [];
+
+var minWeekNo = 0;
+var driverComment = "";
+
+var ss = SpreadsheetApp.getActiveSpreadsheet();
+var sheetsCount = ss.getNumSheets();
+var sheets = ss.getSheets();
+
+function onOpen() { 
+  // Try New Google Sheets method
+  try{
+    var ui = SpreadsheetApp.getUi();
+    ui.createMenu('Alfa-One')
+    .addItem('Collect Drivers Inputs', 'collectDriversInputs')
+    .addItem('Nice Formatting', 'Format')
+    .addItem('Check Duplication', 'checkDuplication')
+    .addItem('Automated all steps','AutoAll')   
+    .addItem('Archive Sheet1', 'archiveSheet1')
+    .addToUi(); 
+  } 
+  
+  // Log the error
+  catch (e){Logger.log(e)}
+  
+  // Use old Google Spreadsheet method
+  finally{
+    var items = [
+      {name: 'Collect Driver Inputs', functionName: 'collectDriversInputs'},
+      {name: 'Nice Formatting', functionName: 'Format'},
+      {name: 'Check Duplication', functionName: 'checkDuplication'},
+      {name: 'Automated all steps', functionName: 'AutoAll'},
+      {name: 'Archive Sheet1', functionName: 'archiveSheet1'}
+    ];
+    var ss = SpreadsheetApp;
+      ss.addMenu('Alfa-One', items);
+  }
+}
+/*
+function driverComments()
+{
+   SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Main Roster").activate();
+   var thisSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+   var lastMainRosterRow = thisSheet.getLastRow();
+   
+   goToSheet1();
+   var Sheet1 = app.getActiveSpreadsheet().getActiveSheet();
+   var rows = Sheet1.getLastRow();
+      
+   //start collecting counted Driver input comments  
+   //status.length =0 
+    for (var rowNum=2; rowNum<=rows; rowNum++)
+    {  
+      var status = thisSheet.getRange(rowNum, 24).getValue(); 
+      if  (status == "COUNTED")
+      {
+      
+      }
+    } 
+}
+*/
+
+//function goToSheet1()
+//{
+//  SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1").activate();
+//}
+
+function checkDuplication()
+  {
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1").activate();
+  var app = SpreadsheetApp;
+  var thisSheet = app.getActiveSpreadsheet().getActiveSheet();
+  var rows = thisSheet.getLastRow();
+  var DriverData = [];
+  var stat;
+  var dD;
+  for (var i=2; i<=rows; i++)
+     {
+     stat = thisSheet.getRange(i,24).getValue();
+     if (stat.length == 0)
+       {
+        dD = thisSheet.getRange(i,2).getValue()+"-"+thisSheet.getRange(i,3).getValue();
+        if (DriverData.indexOf(dD)!=-1)
+           {
+           thisSheet.getRange(i,24).setValue("DUPLICATED");
+           var dupLine = thisSheet.getRange(i,1,1,25)
+           dupLine.setBackground("#85C1E9");    
+           }  
+       }
+      DriverData.push(thisSheet.getRange(i,2).getValue()+"-"+thisSheet.getRange(i,3).getValue());
+      }
+  }  
+  
+
+function checkDuplicationPMDrivers()
+  {
+  var PMDriversSheet =  SpreadsheetApp.openByUrl("");
+  var app = SpreadsheetApp;
+  var thisSheet = app.getActiveSpreadsheet().getActiveSheet();
+  var rows = thisSheet.getLastRow();
+  var DriverData = [];
+  var stat;
+  var dD;
+  for (var i=2; i<=rows; i++)
+     {
+     stat = thisSheet.getRange(i,24).getValue();
+     if (stat.length == 0)
+       {
+        dD = thisSheet.getRange(i,2).getValue()+"-"+thisSheet.getRange(i,3).getValue();
+        if (DriverData.indexOf(dD)!=-1)
+           {
+           thisSheet.getRange(i,24).setValue("DUPLICATED");
+           var dupLine = thisSheet.getRange(i,1,1,25)
+           dupLine.setBackground("#85C1E9");    
+           }  
+       }
+      DriverData.push(thisSheet.getRange(i,2).getValue()+"-"+thisSheet.getRange(i,3).getValue());
+      }
+  }  
+    
+
+function collectDriversInputs() {
+   //goToSheet1();
+   SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1").activate();   
+   //get Ready
+   var app = SpreadsheetApp;
+   var thisSheet = app.getActiveSpreadsheet().getActiveSheet();
+   var rows = thisSheet.getLastRow();
+      
+   //start collecting the newly inserted availability inputs with the given minimum weekno  
+   //status.length =0 
+    for (var rowNum=2; rowNum<=rows; rowNum++)
+    {  
+      var status = thisSheet.getRange(rowNum, 24).getValue(); 
+      if  (status == "")
+          {
+           driverName = thisSheet.getRange(rowNum, 2).getValue();
+           driverID = thisSheet.getRange(rowNum, 3).getValue().toString();
+           Logger.log(driverID);   
+           //collection MainRoster AM shift values
+           if (thisSheet.getRange(rowNum, 5).getValue()=="AM") {amMon.push(driverName+" "+driverID.substring(3,7));} 
+           if (thisSheet.getRange(rowNum, 7).getValue()=="AM") {amTue.push(driverName+" "+driverID.substring(3,7));}
+           if (thisSheet.getRange(rowNum, 9).getValue()=="AM") {amWed.push(driverName+" "+driverID.substring(3,7));}
+           if (thisSheet.getRange(rowNum, 11).getValue()=="AM") {amThu.push(driverName+" "+driverID.substring(3,7));}
+           if (thisSheet.getRange(rowNum, 13).getValue()=="AM") {amFri.push(driverName+" "+driverID.substring(3,7));}
+           if (thisSheet.getRange(rowNum, 15).getValue()=="AM") {amSat.push(driverName+" "+driverID.substring(3,7));}
+           if (thisSheet.getRange(rowNum, 17).getValue()=="AM") {amSun.push(driverName+" "+driverID.substring(3,7));}
+           //collect MainRoster PM shift value      
+           if (thisSheet.getRange(rowNum, 6).getValue()=="PM") {pmMon.push(driverName+" "+driverID.substring(3,7));}
+           if (thisSheet.getRange(rowNum, 8).getValue()=="PM") {pmTue.push(driverName+" "+driverID.substring(3,7));}
+           if (thisSheet.getRange(rowNum, 10).getValue()=="PM") {pmWed.push(driverName+" "+driverID.substring(3,7));}
+           if (thisSheet.getRange(rowNum, 12).getValue()=="PM") {pmThu.push(driverName+ " "+driverID.substring(3,7));}
+           if (thisSheet.getRange(rowNum, 14).getValue()=="PM") {pmFri.push(driverName+ " "+driverID.substring(3,7));}
+           if (thisSheet.getRange(rowNum, 16).getValue()=="PM") {pmSat.push(driverName+ " "+driverID.substring(3,7));}
+           if (thisSheet.getRange(rowNum, 18).getValue()=="PM") {pmSun.push(driverName+ " "+driverID.substring(3,7));}
+ 
+           driverComment = thisSheet.getRange(rowNum, 19).getValue();
+           thisSheet.getRange(rowNum, 24).setValue("COUNTED");
+           thisSheet.getRange(rowNum, 25).setValue(Date());
+            } 
+      } 
+   createDoubleMon();
+   createDoubleTue();   
+   createDoubleWed();   
+   createDoubleThu();   
+   createDoubleFri();     
+   createDoubleSat();     
+   createDoubleSun();
+   
+   writeAmShifts();
+   
+   var maxAM = [];
+ 
+   var c1 = amMon.length; 
+   maxAM.push(c1);
+   var c2 = amTue.length;
+   maxAM.push(c2);
+   var c3 = amWed.length;
+   maxAM.push(c3);
+   var c4 = amThu.length;
+   maxAM.push(c4);
+   var c5 = amFri.length;
+   maxAM.push(c5);
+   var c6 = amSat.length;
+   maxAM.push(c6);
+   var c7= amSun.length;
+   maxAM.push(c7);
+   
+   var amLine = maxAM[0];
+    for (var i=0; i<=maxAM.length; i++)
+    {
+      if (maxAM[i]>amLine) {amLine = maxAM[i];}   
+    };
+    
+   writePmShifts(amLine);
+ 
+   var maxPM = []; 
+   var p1 = pmMon.length; 
+   maxPM.push(p1);
+   var p2 = pmTue.length;
+   maxPM.push(p2);
+   var p3 = pmWed.length;
+   maxPM.push(p3);
+   var p4 = pmThu.length;
+   maxPM.push(p4);
+   var p5 = pmFri.length;
+   maxPM.push(p5);
+   var p6 = pmSat.length;
+   maxPM.push(p6);
+   var p7 = pmSun.length;
+   maxPM.push(p7); 
+    
+   var pmLine = maxPM[0];
+   for (var i=0; i<=maxPM.length; i++)
+    {
+      if (maxPM[i]>pmLine) {pmLine = maxPM[i];}   
+    }; 
+   pmLine = pmLine + amLine;
+   
+   writeDoubles(pmLine);
+}
+
+
+function createDoubleSun()
+  {
+    doubleSun = [];
+    for (var i=0; i<amSun.length; i++)
+    {
+      var a;
+      a = amSun[i];
+      for (var j=0; j<pmSun.length; j++)
+      {
+        var p;
+        p = pmSun[j];
+        if (a == p) 
+          {
+            var string = p;
+            doubleSun.push(string);          
+          }
+      } 
+    }
+    for (var n=0; n<doubleSun.length; n++)
+    {
+      var val = doubleSun[n];
+      var val1 = amSun.indexOf(val);
+      if (val1!=-1) {amSun.splice(val1, 1);};
+      var val2=pmSun.indexOf(val);
+      if (val2!=-1) {pmSun.splice(val2, 1); };
+    }
+  }    
+
+function createDoubleSat()
+  {
+    doubleSat = [];
+    for (var i=0; i<amSat.length; i++)
+    {
+      var a;
+      a = amSat[i];
+      for (var j=0; j<pmSat.length; j++)
+      {
+        var p;
+        p = pmSat[j];
+        if (a == p) 
+          {
+            var string = p;
+            doubleSat.push(string);          }
+      } 
+    }
+    for (var n=0; n<doubleSat.length; n++)
+    {
+      var val = doubleSat[n];
+      var val1 = amSat.indexOf(val);
+      if (val1!=-1) {amSat.splice(val1, 1);};
+      var val2=pmSat.indexOf(val);
+      if (val2!=-1) {pmSat.splice(val2, 1); };
+    }
+  }  
+
+function createDoubleFri()
+  {
+    doubleFri = [];
+    for (var i=0; i<amFri.length; i++)
+    {
+      var a;
+      a = amFri[i];
+      for (var j=0; j<pmFri.length; j++)
+      {
+        var p;
+        p = pmFri[j];
+        if (a == p) 
+          {
+            var string = p;
+            doubleFri.push(string);          }
+      } 
+    }
+    for (var n=0; n<doubleFri.length; n++)
+    {
+      var val = doubleFri[n];
+      var val1 = amFri.indexOf(val);
+      if (val1!=-1) {amFri.splice(val1, 1);};
+      var val2=pmFri.indexOf(val);
+      if (val2!=-1) {pmFri.splice(val2, 1); };
+    }
+  }   
+
+function createDoubleThu()
+  {
+    doubleThu = [];
+    for (var i=0; i<amThu.length; i++)
+    {
+      var a;
+      a = amThu[i];
+      for (var j=0; j<pmThu.length; j++)
+      {
+        var p;
+        p = pmThu[j];
+        if (a == p) 
+          {
+            var string = p;
+            doubleThu.push(string);          }
+      } 
+    }
+    for (var n=0; n<doubleThu.length; n++)
+    {
+      var val = doubleThu[n];
+      var val1 = amThu.indexOf(val);
+      if (val1!=-1) {amThu.splice(val1, 1);};
+      var val2=pmThu.indexOf(val);
+      if (val2!=-1) {pmThu.splice(val2, 1); };
+    }
+  }  
+     
+function createDoubleWed()
+  {
+    doubleWed = [];
+    for (var i=0; i<amWed.length; i++)
+    {
+      var a;
+      a = amWed[i];
+      for (var j=0; j<pmWed.length; j++)
+      {
+        var p;
+        p = pmWed[j];
+        if (a == p) 
+          {
+            var string = p;
+            doubleWed.push(string);          }
+      } 
+    }
+    for (var n=0; n<doubleWed.length; n++)
+    {
+      var val = doubleWed[n];
+      var val1 = amWed.indexOf(val);
+      if (val1!=-1) {amWed.splice(val1, 1);};
+      var val2=pmWed.indexOf(val);
+      if (val2!=-1) {pmWed.splice(val2, 1); };
+    }
+  }  
+  
+function createDoubleTue()
+  {
+    doubleTue = [];
+    for (var i=0; i<amTue.length; i++)
+    {
+      var a;
+      a = amTue[i];
+      for (var j=0; j<pmTue.length; j++)
+      {
+        var p;
+        p = pmTue[j];
+        if (a == p) 
+          {
+            var string = p;
+            doubleTue.push(string);          }
+      } 
+    }
+    for (var n=0; n<doubleTue.length; n++)
+    {
+      var val = doubleTue[n];
+      var val1 = amTue.indexOf(val);
+      if (val1!=-1) {amTue.splice(val1, 1);};
+      var val2=pmTue.indexOf(val);
+      if (val2!=-1) {pmTue.splice(val2, 1); };
+    }
+  }   
+
+function createDoubleMon()
+  {
+    doubleMon = [];
+    for (var i=0; i<amMon.length; i++)
+    {
+      var a;
+      a = amMon[i];
+      for (var j=0; j<pmMon.length; j++)
+      {
+        var p;
+        p = pmMon[j];
+        if (a == p) 
+          {
+            var string = p;
+            doubleMon.push(string);
+          }
+      } 
+    }
+    for (var n=0; n<doubleMon.length; n++)
+    {
+      var val = ""; 
+      val = doubleMon[n];
+      var val1 = amMon.indexOf(val);
+      if (val1!=-1) {amMon.splice(val1, 1);};
+      var val2=pmMon.indexOf(val);
+      if (val2!=-1) {pmMon.splice(val2, 1); };
+    }
+  }  
+
+function writeAmShifts()
+  {
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Main Roster").activate();
+    var thisSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+   
+    for (var i=0; i<amMon.length; i++){thisSheet.getRange(i+2,1).setValue("AM");
+                                       thisSheet.getRange(i+2,2).setValue(amMon[i]);}
+    for (var i=0; i<amTue.length; i++){thisSheet.getRange(i+2,1).setValue("AM");
+                                       thisSheet.getRange(i+2,3).setValue(amTue[i]);}
+    for (var i=0; i<amWed.length; i++){thisSheet.getRange(i+2,1).setValue("AM");
+                                       thisSheet.getRange(i+2,4).setValue(amWed[i]);}
+    for (var i=0; i<amThu.length; i++){thisSheet.getRange(i+2,1).setValue("AM");
+                                       thisSheet.getRange(i+2,5).setValue(amThu[i]);}
+    for (var i=0; i<amFri.length; i++){thisSheet.getRange(i+2,1).setValue("AM");
+                                       thisSheet.getRange(i+2,6).setValue(amFri[i]);}
+    for (var i=0; i<amSat.length; i++){thisSheet.getRange(i+2,1).setValue("AM");
+                                       thisSheet.getRange(i+2,7).setValue(amSat[i]);}
+    for (var i=0; i<amSun.length; i++){thisSheet.getRange(i+2,1).setValue("AM");
+                                       thisSheet.getRange(i+2,8).setValue(amSun[i]);}  
+  }     
+
+function writePmShifts(pmArg)
+  {
+    var pm = pmArg +2;
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Main Roster").activate();
+    var thisSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    for (var i=0; i<pmMon.length; i++){thisSheet.getRange(i+pm,1).setValue("PM");
+                                       thisSheet.getRange(i+pm,2).setValue(pmMon[i]);}
+    for (var i=0; i<pmTue.length; i++){thisSheet.getRange(i+pm,1).setValue("PM");
+                                       thisSheet.getRange(i+pm,3).setValue(pmTue[i]);}
+    for (var i=0; i<pmWed.length; i++){thisSheet.getRange(i+pm,1).setValue("PM");
+                                       thisSheet.getRange(i+pm,4).setValue(pmWed[i]);}
+    for (var i=0; i<pmThu.length; i++){thisSheet.getRange(i+pm,1).setValue("PM");
+                                       thisSheet.getRange(i+pm,5).setValue(pmThu[i]);}
+    for (var i=0; i<pmFri.length; i++){thisSheet.getRange(i+pm,1).setValue("PM");
+                                       thisSheet.getRange(i+pm,6).setValue(pmFri[i]);}
+    for (var i=0; i<pmSat.length; i++){thisSheet.getRange(i+pm,1).setValue("PM");
+                                       thisSheet.getRange(i+pm,7).setValue(pmSat[i]);}
+    for (var i=0; i<pmSun.length; i++){thisSheet.getRange(i+pm,1).setValue("PM");
+                                       thisSheet.getRange(i+pm,8).setValue(pmSun[i]);}
+  }     
+function writeDoubles (doubleArg)
+  {
+    var db = doubleArg + 2;
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Main Roster").activate();
+    var thisSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    for (var i1=0; i1<doubleMon.length; i1++){thisSheet.getRange(i1+db,1).setValue("DOUBLE");
+                                              thisSheet.getRange(i1+db,2).setValue(doubleMon[i1]);}
+    for (var i2=0; i2<doubleTue.length; i2++){thisSheet.getRange(i2+db,1).setValue("DOUBLE");
+                                              thisSheet.getRange(i2+db,3).setValue(doubleTue[i2]);}
+    for (var i3=0; i3<doubleWed.length; i3++){thisSheet.getRange(i3+db,1).setValue("DOUBLE");
+                                              thisSheet.getRange(i3+db,4).setValue(doubleWed[i3]);}
+    for (var i4=0; i4<doubleThu.length; i4++){thisSheet.getRange(i4+db,1).setValue("DOUBLE");
+                                              thisSheet.getRange(i4+db,5).setValue(doubleThu[i4]);}
+    for (var i5=0; i5<doubleFri.length; i5++){thisSheet.getRange(i5+db,1).setValue("DOUBLE");
+                                              thisSheet.getRange(i5+db,6).setValue(doubleFri[i5]);}
+    for (var i6=0; i6<doubleSat.length; i6++){thisSheet.getRange(i6+db,1).setValue("DOUBLE");
+                                              thisSheet.getRange(i6+db,7).setValue(doubleSat[i6]);}
+    for (var i7=0; i7<doubleSun.length; i7++){thisSheet.getRange(i7+db,1).setValue("DOUBLE");
+                                              thisSheet.getRange(i7+db,8).setValue(doubleSun[i7]);}
+  }  
+
+function Format()
+  {
+   SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Main Roster").activate();
+   var amline;
+   var pmline;
+   var dbline;
+   
+   var thisSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+   var rows = thisSheet.getLastRow();
+   for (var j=2; j<=rows; j++)
+    {
+      var shift;
+      shift = thisSheet.getRange(j,1).getValue();
+      if (shift == "AM")
+        {
+        var changeLine = thisSheet.getRange(j,1,1,8)
+        changeLine.setBackground("#FAD7A0");
+        amline = j;
+        }
+      else if (shift == "PM")
+        {
+        var changeLine = thisSheet.getRange(j,1,1,8)
+        changeLine.setBackground("#85C1E9");
+        pmline = j;
+        }
+      else if (shift == "DOUBLE")
+        {
+        var changeLine = thisSheet.getRange(j,1,1,8)
+        changeLine.setBackground("#F5B7B1");
+        dbline = j;
+        }
+      var cell = thisSheet.getRange(j,1,1,1);
+      cell.setBorder(true,true,true,true,false,false);
+      cell = thisSheet.getRange(j,2,1,1); cell.setBorder(true,true,true,true,false,false);
+      cell = thisSheet.getRange(j,3,1,1); cell.setBorder(true,true,true,true,false,false);
+      cell = thisSheet.getRange(j,4,1,1); cell.setBorder(true,true,true,true,false,false);
+      cell = thisSheet.getRange(j,5,1,1); cell.setBorder(true,true,true,true,false,false);
+      cell = thisSheet.getRange(j,6,1,1); cell.setBorder(true,true,true,true,false,false);
+      cell = thisSheet.getRange(j,7,1,1); cell.setBorder(true,true,true,true,false,false);
+      cell = thisSheet.getRange(j,8,1,1); cell.setBorder(true,true,true,true,false,false);      
+    }
+   var linecount = amline - 1;
+   if (linecount >1) 
+     {
+     var cellsToMergeAM =  thisSheet.getRange(2, 1, linecount);
+     cellsToMergeAM.mergeVertically();
+     }
+   
+   linecount = pmline-amline;
+   if (linecount >1)
+     {
+     var cellsToMergePM =  thisSheet.getRange(amline+1, 1, linecount);
+     cellsToMergePM.mergeVertically();
+     }
+   
+   linecount = dbline-pmline;
+   if (linecount>1)
+     {
+     var cellsToMergeDBL = thisSheet.getRange(pmline+1,1, linecount);
+     cellsToMergeDBL.mergeVertically();
+     }
+   
+  thisSheet.autoResizeColumns(1,8) 
+  
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1").activate();
+  
+  }
+  
+function backupMainRoster()
+{
+try
+  {
+  var appl = SpreadsheetApp;
+  var commandSheet = appl.getActiveSpreadsheet().getSheetByName("Admin").activate();
+  var adminCommand = commandSheet.getRange(3,2).getValue();
+  if (adminCommand.toString().toLowerCase() == "yes")
+    {
+    var sheetMainRoster = appl.getActiveSpreadsheet().getSheetByName("Main Roster").activate();
+    var lastRow = sheetMainRoster.getLastRow();
+    for (var i=2; i<=lastRow; i++)
+      {
+      var roster1Row = [];
+      var isBackupTaken = sheetMainRoster.getRange(i,9).getValue();
+      if (isBackupTaken =="")
+        {
+        roster1Row.push(sheetMainRoster.getRange(i,1).getValue());
+        roster1Row.push(sheetMainRoster.getRange(i,2).getValue());
+        roster1Row.push(sheetMainRoster.getRange(i,3).getValue());
+        roster1Row.push(sheetMainRoster.getRange(i,4).getValue());
+        roster1Row.push(sheetMainRoster.getRange(i,5).getValue());
+        roster1Row.push(sheetMainRoster.getRange(i,6).getValue());
+        roster1Row.push(sheetMainRoster.getRange(i,7).getValue());
+        roster1Row.push(sheetMainRoster.getRange(i,8).getValue());
+        writeToMainRosterBackup(roster1Row);
+        sheetMainRoster.getRange(i, 9).setValue("DONE");
+        }
+      }
+    }
+  }
+catch (e)
+  {  
+  Logger.log(e);
+  }
+finally
+  {SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();}
+}
+
+function writeToMainRosterBackup(inputMatrix)
+{
+try
+  {
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Archive of Main Roster").activate();
+  var archiveSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  archiveSheet.insertRowBefore(2);
+  archiveSheet.getRange(2,1).setValue(Date());
+  for (var i=0; i<=inputMatrix.length-1; i++)
+    {
+    archiveSheet.getRange(2,i+2).setValue(inputMatrix[i]);
+    }
+  }
+catch (e)
+  {
+  Logger.log(e);
+  }
+finally
+  {
+  SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  }
+}
+
+//this function deletes main roster row which were backup 
+function cleanBackupedMainRoster()
+{
+try
+  {
+   SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Admin").activate();  
+   var admSheet =  SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+   var adminCommand = admSheet.getRange(5,2).getValue();
+   if (adminCommand.toString().toLowerCase() == "yes")
+   {
+     SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Main Roster").activate();
+     var thisSheet =  SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+     var rows = thisSheet.getLastRow();
+     for (var i=2; i<=rows; i++)
+       {
+       thisSheet.getRange(i, 1, 1, 9).clearContent();     
+       }
+       thisSheet.getRange(2, 1, 50, 1).breakApart();  
+       var cell = thisSheet.getRange(1,1,1,1);
+       for (var j=2; j<=rows; j++)
+        { 
+         cell = thisSheet.getRange(j,1,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+         cell = thisSheet.getRange(j,2,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+         cell = thisSheet.getRange(j,3,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+         cell = thisSheet.getRange(j,4,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+         cell = thisSheet.getRange(j,5,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+         cell = thisSheet.getRange(j,6,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+         cell = thisSheet.getRange(j,7,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+         cell = thisSheet.getRange(j,8,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+         cell = thisSheet.getRange(j,9,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+        }
+      }
+  }
+catch (e)
+  {
+  Logger.log(e);
+  }
+finally
+  {
+  SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  }
+}
+
+//check if the row was counted or not in "Sheet1", collects the matrix and passes it to WriteToBackup(inputMatrix) 
+function backupSheet1()
+{
+try
+  {
+  var appl = SpreadsheetApp;
+  var commandSheet = appl.getActiveSpreadsheet().getSheetByName("Admin").activate();
+  var sheet1command = commandSheet.getRange(2,2).getValue();
+  if (sheet1command.toString().toLowerCase() == "yes")
+    {
+    var sheet1 = appl.getActiveSpreadsheet().getSheetByName("Sheet1").activate();
+    var sheet1LastRow = sheet1.getLastRow();
+    for (var i=2; i<=sheet1LastRow; i++)
+      {
+      var sheet1Row = [];
+      var isBackupDone = sheet1.getRange(i,26).getValue();
+      var isCounted = sheet1.getRange(i, 24).getValue();
+      if (isBackupDone == "" && isCounted == "COUNTED")
+        {
+        sheet1Row.push(sheet1.getRange(i,1).getValue());
+        sheet1Row.push(sheet1.getRange(i, 2).getValue());
+        sheet1Row.push(sheet1.getRange(i, 3).getValue());
+        sheet1Row.push(sheet1.getRange(i, 4).getValue());
+        sheet1Row.push(sheet1.getRange(i, 5).getValue());
+        sheet1Row.push(sheet1.getRange(i, 6).getValue());
+        sheet1Row.push(sheet1.getRange(i, 7).getValue());
+        sheet1Row.push(sheet1.getRange(i, 8).getValue());
+        sheet1Row.push(sheet1.getRange(i, 9).getValue());
+        sheet1Row.push(sheet1.getRange(i, 10).getValue());
+        sheet1Row.push(sheet1.getRange(i, 11).getValue());
+        sheet1Row.push(sheet1.getRange(i, 12).getValue());
+        sheet1Row.push(sheet1.getRange(i, 13).getValue());
+        sheet1Row.push(sheet1.getRange(i, 14).getValue());
+        sheet1Row.push(sheet1.getRange(i, 15).getValue());
+        sheet1Row.push(sheet1.getRange(i, 16).getValue());
+        sheet1Row.push(sheet1.getRange(i, 17).getValue());
+        sheet1Row.push(sheet1.getRange(i, 18).getValue());
+        sheet1Row.push(sheet1.getRange(i, 19).getValue());
+        sheet1Row.push(sheet1.getRange(i, 20).getValue());
+        sheet1Row.push(sheet1.getRange(i, 21).getValue());
+        sheet1Row.push(sheet1.getRange(i, 22).getValue());
+        sheet1Row.push(sheet1.getRange(i, 23).getValue());
+        sheet1Row.push(sheet1.getRange(i, 24).getValue());
+        sheet1Row.push(sheet1.getRange(i, 25).getValue());
+        WriteToBackup(sheet1Row);
+        sheet1.getRange(i, 26).setValue("DONE");
+        }
+      }
+    }
+  }
+catch (e){Logger.log(e)}
+
+finally 
+  {
+  SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  }
+}
+
+function WriteToBackup(inputMatrix)
+{
+try
+  {
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Archive of Sheet1").activate();
+  var archiveSheet1 = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  archiveSheet1.insertRowBefore(2);
+  for (var i=0; i<=inputMatrix.length-1; i++)
+    {
+    archiveSheet1.getRange(2,i+1).setValue(inputMatrix[i]);
+    }
+  }
+catch (e)
+  {
+  Logger.log(e);
+  }
+finally
+  {
+  SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  }
+}
+
+function ClearSheet1()
+{
+  try
+  {
+   SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Admin").activate();
+   var thisApp = SpreadsheetApp;
+   var adminSheet = thisApp.getActiveSpreadsheet().getActiveSheet();
+   var adminCommand = adminSheet.getRange(4, 2).getValues();
+   if (adminCommand.toString().toLowerCase() == "yes")
+     {
+     SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1").activate();
+     var app = SpreadsheetApp;
+     var SheetOne = app.getActiveSpreadsheet().getActiveSheet();
+     var rows = SheetOne.getLastRow();
+     var columns = SheetOne.getLastColumn();
+     for (var i=2; i<=rows; i++)
+       {
+       var singleCell = SheetOne.getRange(i,26);
+       var isBackup = singleCell.getValue();
+       if (isBackup =="DONE")
+         {
+         SheetOne.getRange(i, 1, 1,columns).clearContent();
+         SheetOne.getRange(i, 1, 1, columns).setBackground(null);
+         }
+       }
+     }  
+  }
+  catch (e) 
+  {
+  Logger.log(e);
+  }
+  finally
+  {
+  SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  }
+}
+
+function countedToClean()
+{
+  //goToSheet1();
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1").activate();  
+  var app = SpreadsheetApp;
+  var thisSheet = app.getActiveSpreadsheet().getActiveSheet();
+  var rows = thisSheet.getLastRow();
+  for (var i=2; i<=rows; i++)
+     {
+     stat = thisSheet.getRange(i,24).getValue();
+     if (stat == "COUNTED")
+       {thisSheet.getRange(i,24).setValue("");}  
+     }
+}
+
+function cleanMainRoster()
+  {
+   SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Main Roster").activate();
+   var app = SpreadsheetApp;
+   var thisSheet = app.getActiveSpreadsheet().getActiveSheet();
+   var rows = thisSheet.getLastRow();
+   for (var i=2; i<=rows; i++)
+     {
+     thisSheet.getRange(i, 1, 1, 8).clearContent();     
+     }
+   thisSheet.getRange(2, 1, 50, 1).breakApart();  
+   var cell = thisSheet.getRange(1,1,1,1);
+   for (var j=2; j<=rows; j++)
+     { 
+      cell = thisSheet.getRange(j,1,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+      cell = thisSheet.getRange(j,2,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+      cell = thisSheet.getRange(j,3,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+      cell = thisSheet.getRange(j,4,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+      cell = thisSheet.getRange(j,5,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+      cell = thisSheet.getRange(j,6,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+      cell = thisSheet.getRange(j,7,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+      cell = thisSheet.getRange(j,8,1,1); cell.setBorder(false,false,false,false,false,false); cell.setBackground(null);
+     }
+   }
+
+function AutoAll()
+{
+  var app = SpreadsheetApp;
+  SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Admin").activate();  
+  var admSheet = app.getActiveSpreadsheet().getActiveSheet();
+  var adminCommand = admSheet.getRange(6,2).getValue();
+  if (adminCommand.toString().toLowerCase() == "yes")
+  {
+    //goToSheet1();
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1").activate();
+    var thisSheet = app.getActiveSpreadsheet().getActiveSheet();
+    var rows = thisSheet.getLastRow();
+    var isNew;
+    for (var i=2; i<=rows; i++)
+    {
+     isNew = thisSheet.getRange(i, 24).getValue();
+     if (isNew == "")
+       {
+        checkDuplication(); //check if the same driver provided duplicated input and marks it as duplicated
+        countedToClean(); //clean all counted rows to clean , in order create fresh AM PM DOUBLE matrixes
+        cleanMainRoster(); //clean mainRoster
+        collectDriversInputs(); //newly collects driver inputs and write them to Main Roster
+        Format(); //Makes nice visible format for Main roster
+       }
+    }
+  }
+
+  //ar ui = SpreadsheetApp.getUi();
+  //var result = ui.alert(
+  //   'Menu...',
+  //   "Close it and Go home...",
+  //    ui.ButtonSet.OK);
+}
